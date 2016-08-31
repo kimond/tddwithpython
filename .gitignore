@@ -1,0 +1,2 @@
+*.pyc
+/superlists/db.sqlite3
