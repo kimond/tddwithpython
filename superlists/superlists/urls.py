@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from lists.views import home_page, view_list, new_list, add_item
+from lists.views import home_page, view_list, new_list
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
