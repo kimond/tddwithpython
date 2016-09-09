@@ -1,19 +1,18 @@
 from django.test import TestCase
-from django.urls import resolve
 from django.utils.html import escape
 
+from ..forms import ItemForm
 from ..models import Item, List
-from ..views import home_page
 
 
 class HomePageTest(TestCase):
-    def test_root_url_resolves_to_home_page_view(self):
-        found = resolve('/')
-        self.assertEquals(found.func, home_page)
-
-    def test_home_page_uses_correct_template(self):
+    def test_home_page_renders_home_template(self):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'home.html')
+
+    def test_home_page_uses_item_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
 
 class NewListTest(TestCase):
