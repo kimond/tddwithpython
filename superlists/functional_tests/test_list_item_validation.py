@@ -4,11 +4,8 @@ from .base import FunctionalTest
 
 
 class ItemValidationTest(FunctionalTest):
-    @skip
+    @skip('Skipped because chrome required validation cause an issue')
     def test_cannot_add_empty_list_items(self):
-        """
-        Skipped because chrome required validation cause an issue
-        """
 
         # Edith goes to the home page and accidentally tries to submit
         # and empty list item. She hits Enter on the empty input box
