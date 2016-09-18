@@ -10,7 +10,12 @@
 <div class="container">
     <nav class="navbar navbar-default" role="navigation">
         <a class="navbar-brand" href="/">Superlists</a>
-        <a class="btn navbar-btn navbar-right" id="id_login" href="#">Sign in</a>
+        {% if user.email %}
+            <a class="btn navbar-btn navbar-right" id="id_logout" href="#">Log out</a>
+            <span class="navbar-text navbar-right">Logged in as {{ user.email }}</span>
+        {% else %}
+            <a class="btn navbar-btn navbar-right" id="id_login" href="#">Sign in</a>
+        {% endif %}
     </nav>
     <div class="row">
         <div class="col-md-6 col-md-offset-3 jumbotron">
@@ -21,7 +26,7 @@
                     {% csrf_token %}
                     {% if form.errors %}
                         <div class="form-group has-error">
-                           <span class="help-block">{{ form.text.errors }}</span>
+                            <span class="help-block">{{ form.text.errors }}</span>
                         </div>
                     {% endif %}
                 </form>
@@ -38,14 +43,14 @@
 <script src="/static/accounts.js"></script>
 <script src="/static/list.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var user = "{{ user.email }}" || null;
         var token = "{{ csrf_token }}";
         var urls = {
-            login: "TODO",
+            login: "{% url 'persona_login' %}",
             logout: "TODO",
         }
-        Superlists.Accounts.initialize(navigator)
+        Superlists.Accounts.initialize(navigator, user, token, urls)
     });
 </script>
 </body>
