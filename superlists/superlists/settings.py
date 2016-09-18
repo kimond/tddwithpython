@@ -25,7 +25,8 @@ SECRET_KEY = '93!+c-r%ny3td)5-du4%$jp3wq)ij3*w&^1)%7(rt1dh&b3(0('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+DOMAIN = "localhost"
+ALLOWED_HOSTS = [DOMAIN]
 
 
 # Application definition
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'lists',
     'accounts',
+    'functional_tests',
 ]
 
 MIDDLEWARE = [

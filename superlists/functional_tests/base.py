@@ -3,6 +3,7 @@ import sys
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
+from .server_tools import reset_database
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -10,17 +11,21 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUpClass(cls):
         for arg in sys.argv:
             if 'liveserver' in arg:
+                cls.server_host = arg.split('=')[1]
                 cls.server_url = 'http://' + arg.split('=')[1]
+                cls.against_staging = True
                 return
         super().setUpClass()
+        cls.against_staging = False
         cls.server_url = cls.live_server_url
 
     @classmethod
     def tearDownClass(cls):
-        if cls.server_url == cls.live_server_url:
-            super().tearDownClass()
+        super().tearDownClass()
 
     def setUp(self):
+        if self.against_staging:
+            reset_database(self.server_host)
         self.browser = webdriver.Chrome()
         self.browser.implicitly_wait(3)
 
