@@ -1,10 +1,16 @@
 from unittest import skip
 
+from django.http import HttpRequest
 from django.test import TestCase
 from django.utils.html import escape
 
+from ..views import new_list
 from ..forms import ItemForm, EMPTY_LIST_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm
 from ..models import Item, List
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class HomePageTest(TestCase):
@@ -59,6 +65,14 @@ class NewListTest(TestCase):
     def test_for_invalid_input_passes_form_to_template(self):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
+
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
+        request = HttpRequest()
+        request.user = User.objects.create(email='a@b.com')
+        request.POST['text'] = 'new list item'
+        new_list(request)
+        list_ = List.objects.first()
+        self.assertEquals(list.owner, request.user)
 
 
 class ListViewTest(TestCase):
@@ -155,7 +169,15 @@ class ListViewTest(TestCase):
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
+
 class MyListsTest(TestCase):
     def test_my_lists_url_renders_my_lists_template(self):
+        User.objects.create(email='a@b.com')
         response = self.client.get('/lists/users/a@b.com/')
         self.assertTemplateUsed(response, 'my_lists.html')
+
+    def test_passes_correct_owner_to_template(self):
+        User.objects.create(email='wrong@owner.com')
+        correct_user = User.objects.create(email='a@b.com')
+        response = self.client.get('/lists/users/a@b.com/')
+        self.assertEquals(response.context['owner'], correct_user)
