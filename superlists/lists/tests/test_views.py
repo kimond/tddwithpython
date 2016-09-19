@@ -72,7 +72,7 @@ class NewListTest(TestCase):
         request.POST['text'] = 'new list item'
         new_list(request)
         list_ = List.objects.first()
-        self.assertEquals(list.owner, request.user)
+        self.assertEquals(list_.owner, request.user)
 
 
 class ListViewTest(TestCase):
