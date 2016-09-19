@@ -1,8 +1,10 @@
 from unittest import skip
 
+import unittest
 from django.http import HttpRequest
 from django.test import TestCase
 from django.utils.html import escape
+from unittest.mock import Mock, patch
 
 from ..views import new_list
 from ..forms import ItemForm, EMPTY_LIST_ERROR, DUPLICATE_ITEM_ERROR, ExistingListItemForm
@@ -23,7 +25,7 @@ class HomePageTest(TestCase):
         self.assertIsInstance(response.context['form'], ItemForm)
 
 
-class NewListTest(TestCase):
+class NewListViewIntegratedTest(TestCase):
     def test_saving_a_POST_request(self):
         self.client.post(
             '/lists/new',
@@ -169,6 +171,51 @@ class ListViewTest(TestCase):
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
+@patch('lists.views.NewListForm')
+class NewListViewUnitTest(unittest.TestCase):
+
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'new list item'
+        self.request.user = Mock()
+
+    def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
+        new_list(self.request)
+        mockNewListForm.assert_called_once_with(data=self.request.POST)
+
+    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        new_list(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)
+
+    @patch('lists.views.redirect')
+    def test_redirects_to_form_returned_object_if_form_valid(self, mock_redirect, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+
+        response = new_list(self.request)
+
+        self.assertEquals(response, mock_redirect.return_value)
+        mock_redirect.assert_called_once_with(mock_form.save.return_value)
+
+    @patch('lists.views.render')
+    def test_renders_home_template_wth_form_if_form_invalid(self, mock_render, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+
+        response = new_list(self.request)
+
+        self.assertEquals(response, mock_render.return_value)
+        mock_render.assert_called_once_with(
+            self.request, 'home.html', {'form': mock_form}
+        )
+
+    def test_does_not_save_if_form_invalid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list(self.request)
+        self.assertFalse(mock_form.save.called)
 
 class MyListsTest(TestCase):
     def test_my_lists_url_renders_my_lists_template(self):
