@@ -16,11 +16,11 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from lists.views import home_page, view_list, new_list
+from lists.views import HomePageView, view_list
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', home_page, name='home'),
+    url(r'^$', HomePageView.as_view(), name='home'),
     url(r'^lists/', include('lists.urls')),
     url(r'^accounts/', include('accounts.urls')),
 ]

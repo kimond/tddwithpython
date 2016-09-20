@@ -7,6 +7,11 @@ User = get_user_model()
 
 
 class ItemModelTest(TestCase):
+    def test_get_absolute_url(self):
+        list_ = List.objects.create()
+        item = Item.objects.create(list=list_, text='test')
+        self.assertEquals(item.get_absolute_url(), '/lists/%d/' % (item.list.id,))
+
     def test_default_text(self):
         item = Item()
         self.assertEquals(item.text, '')
