@@ -87,7 +87,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             try:
                 return function_with_assertion()
             except (AssertionError, WebDriverException):
-                time.spleep(0.1)
+                time.sleep(0.1)
         return function_with_assertion()
 
     def check_for_row_in_list_table(self, row_text):

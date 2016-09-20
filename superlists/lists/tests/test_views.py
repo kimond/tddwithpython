@@ -171,9 +171,9 @@ class ListViewTest(TestCase):
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
+
 @patch('lists.views.NewListForm')
 class NewListViewUnitTest(unittest.TestCase):
-
     def setUp(self):
         self.request = HttpRequest()
         self.request.POST['text'] = 'new list item'
@@ -217,6 +217,7 @@ class NewListViewUnitTest(unittest.TestCase):
         new_list(self.request)
         self.assertFalse(mock_form.save.called)
 
+
 class MyListsTest(TestCase):
     def test_my_lists_url_renders_my_lists_template(self):
         User.objects.create(email='a@b.com')
@@ -228,3 +229,21 @@ class MyListsTest(TestCase):
         correct_user = User.objects.create(email='a@b.com')
         response = self.client.get('/lists/users/a@b.com/')
         self.assertEquals(response.context['owner'], correct_user)
+
+
+class ShareList(TestCase):
+    def setUp(self):
+        self.list = List.objects.create()
+
+    def test_post_redirects_to_lists_page(self):
+        response = self.client.post('/lists/{}/share'.format(self.list.id), data={'email': 'test@example.com'})
+        self.assertRedirects(response, '/lists/{}/'.format(self.list.id))
+
+    def test_POST_adds_user_to_shared_with_list(self):
+        user = User.objects.create(email='a@b.com')
+        self.client.post('/lists/{}/share'.format(self.list.id), data={'email': 'a@b.com'})
+        self.assertIn(user, list(self.list.shared_with.all()))
+
+    def test_POST_redirect_to_list_page_with_invalid_data(self):
+        response = self.client.post('/lists/{}/share'.format(self.list.id))
+        self.assertRedirects(response, '/lists/{}/'.format(self.list.id))
