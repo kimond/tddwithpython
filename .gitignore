@@ -4,3 +4,4 @@
 /database/
 /virtualenv/
 /superlists/functional_tests/screendumps/
+/superlists/ghostdriver.log
